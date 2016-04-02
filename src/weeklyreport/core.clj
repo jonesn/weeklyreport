@@ -1,10 +1,10 @@
 (ns weeklyreport.core
   (require [clojure.tools.cli :refer [parse-opts]]
-           [clojure.string :as string]
-           [endophile.core :as mdown]
+           [clojure.string  :as string]
+           [endophile.core  :as mdown]
            [com.rpl.specter :as spec]
-           [clojure.walk :as walk]
-           [clj-pdf.core :as pdf])
+           [clojure.walk    :as walk]
+           [clj-pdf.core    :as pdf])
   (import
     (java.time LocalDateTime))
   (:gen-class))
@@ -194,10 +194,13 @@
 (defn -main
   [& args]
   (let [cli-params (parse-opts args command-line-schema)
-        options (:options cli-params)
-        summary (:summary cli-params)
-        arguments (:arguments cli-params)]
+        options    (:options cli-params)
+        summary    (:summary cli-params)
+        arguments  (:arguments cli-params)]
     (cond
-      (:help options) (exit 0 (usage summary))
+      (:help options)         (exit 0 (usage summary))
       (not= (count arguments) 2) (exit 1 (usage summary))
-      :default nil)))
+      :default                (process-file
+                                (first arguments)
+                                (second arguments)
+                                (:type options)))))

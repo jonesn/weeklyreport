@@ -31,8 +31,7 @@
                            " Following up on permissions issue for new file system shares.")})})
 
 (def expected-list
-  [:list
-   {:roman true}
+  [:list {:indent 10}
    "[Operations Redcon] Wholesale Settlement."
    "[Operations Linux WR 27783] Following up on permissions issue for new file system shares."])
 
