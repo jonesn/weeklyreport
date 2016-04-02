@@ -5,6 +5,8 @@
            [com.rpl.specter :as spec]
            [clojure.walk :as walk]
            [clj-pdf.core :as pdf])
+  (import
+    (java.time LocalDateTime))
   (:gen-class))
 
 ;; ==============
@@ -31,8 +33,7 @@
             :else (recur (rest seq-to-parse))))))
 
 (defn path->markdownclj
-  "Takes the given file path pointing to a markdown file and loads
-   that file into a clojure datastructure."
+  "Takes the given file path pointing to a markdown file and loads that file into a clojure datastructure."
   [string-file-path]
   (doall
     (mdown/to-clj
@@ -53,32 +54,38 @@
 ;; PDF Logic
 ;; ==========
 
-(def heading-color [98 190 255])
+(def heading-color-blue [98 190 255])
+
+(def heading-color-grey [150 150 150])
 
 (def pdf-metadata
-  {:title  "Hello Doc"
+  {:title  "Arachnid Work Report."
    :author "Nick Jones"})
+
+(def header-block
+  [:table {:width 100 :widths [92 8] :border-width 0}
+   [[:cell [:phrase {:style :italic :size 8 :family :helvetica :color heading-color-grey} (str "Generated: " (LocalDateTime/now))]]
+    [:cell [:image {:xscale 0.5 :yscale 0.5} "resources/header_logo_blue.png"]]]])
 
 (def heading-one-style
   {:style
-   {:align  :center
-    :size   18
-    :color  heading-color
+   {:size   18
+    :color  heading-color-blue
     :family :helvetica}})
 
 (def heading-two-style
   {:style
    {:size   16
-    :color  heading-color
+    :color  heading-color-blue
     :family :helvetica}})
 
 (def heading-three-style
   {:style
    {:size   14
-    :color  heading-color
+    :color  heading-color-grey
     :family :helvetica}})
 
-;; Please note for some reason a paragraph style is different to a header style.
+;; For some reason a paragraph style is different to a header style.
 ;; It isn't an embedded map as it is for a header.
 (def paragraph-style
   {:size 10 :family :helvetica})
@@ -93,6 +100,7 @@
       (string/join content))))
 
 (defn construct-list-for-pdf
+  "This method is called from the multimethod to handle the construction of a list."
   [root-list-element]
   (when-let [seq-of-li-elements (:content root-list-element)]
     (vec
@@ -101,6 +109,24 @@
               (map
                 #(apply str (:content %))
                 seq-of-li-elements))))))
+
+(defn add-metadata-to-doc-and-remove-nulls
+  "Preps the PDF for writing by adding the stylesheet and removing NULLs"
+  [pdf-data-structure]
+  (->>
+    (filter #(not (nil? %)) pdf-data-structure)
+    (cons header-block)
+    (cons pdf-metadata)
+    (vec)))
+
+(defn interpose-spacers
+  [pdf-data-structure]
+  (interpose [:spacer] pdf-data-structure))
+
+(defn write-pdf
+  "Takes a clj-pdf vector description of a PDF and writes it to disk."
+  [pdf-data-structure output-file-path]
+  (pdf/pdf pdf-data-structure output-file-path))
 
 (defmulti construct-pdf-from-clj
           "Multimethod to help convert clojure data structures to PDF."
@@ -128,28 +154,11 @@
 
 (defmethod construct-pdf-from-clj :default
   [element-map]
-  (println "Default fall back called."))
+  (println (str "Won't convert element of type: ." element-map)))
 
 (defn markdownclj->pdfclj
   [markdownclj]
   (walk/walk construct-pdf-from-clj identity markdownclj))
-
-(defn add-metadata-to-doc-and-remove-nulls
-  "Preps the PDF for writing by adding the stylesheet and removing NULLs"
-  [pdf-data-structure]
-  (->>
-    (filter #(not (nil? %)) pdf-data-structure)
-    (cons pdf-metadata)
-    (vec)))
-
-(defn interpose-spacers
-  [pdf-data-structure]
-  (interpose [:spacer] pdf-data-structure))
-
-(defn write-pdf
-  "Takes a clj-pdf vector description of a PDF and writes it to disk."
-  [pdf-data-structure output-file-path]
-  (pdf/pdf pdf-data-structure output-file-path))
 
 ;; =====================
 ;; Command Line and Main
