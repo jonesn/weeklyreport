@@ -1,6 +1,6 @@
 # weeklyreport
 
-Weekly/Monthly report utility for contracting jobs. Generates PDF of master markdown.
+Weekly/Monthly report utility for contracting jobs. Generates PDF off of a master markdown file.
 
 ## Usage
 
