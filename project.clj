@@ -7,6 +7,7 @@
                  [org.clojure/tools.cli "0.3.3"]
                  [endophile "0.1.2"]
                  [clj-pdf "2.2.0"]
+                 [clj-time "0.11.0"]
                  [com.rpl/specter "0.9.2"]]
   :main ^:skip-aot weeklyreport.core
   :target-path "target/%s"

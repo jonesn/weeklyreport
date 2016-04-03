@@ -1,6 +1,7 @@
 (ns weeklyreport.core-test
   (:require [clojure.test :refer :all]
-            [weeklyreport.core :refer :all]))
+            [weeklyreport.core :refer :all]
+            [clj-time.local :as localtime]))
 
 (deftest test-pdf-multimethod-simplecases
   (testing "Testing the various mapings from my Markdown datastructure to a CLJ PDF supported one."
@@ -40,3 +41,15 @@
   (is
     (= expected-list
        (construct-pdf-from-clj list-input))))
+
+;; ==================
+;; File Path Handling
+;; ==================
+
+(deftest test-decide-output-file-name
+  (is
+    (= "outputdir/arachnid_red_weeklyreport_20160328_20160403.pdf"
+       (decide-output-file-name "outputdir" "WEEKLY" (localtime/to-local-date-time "2016-04-04T02:00:00.000"))))
+  (is
+    (= "outputdir/arachnid_red_monthlyreport_201603.pdf"
+       (decide-output-file-name "outputdir" "MONTHLY" (localtime/to-local-date-time "2016-04-04T02:00:00.000")))))

@@ -1,12 +1,14 @@
 (ns weeklyreport.core
   (require [clojure.tools.cli :refer [parse-opts]]
-           [clojure.string  :as string]
-           [endophile.core  :as mdown]
+           [clojure.string :as string]
+           [endophile.core :as mdown]
            [com.rpl.specter :as spec]
-           [clojure.walk    :as walk]
-           [clj-pdf.core    :as pdf])
-  (import
-    (java.time LocalDateTime))
+           [clojure.walk :as walk]
+           [clj-pdf.core :as pdf]
+           [clj-time.local :as localtime]
+           [clj-time.core :as time]
+           [clj-time.format :as timefmt]
+           [clj-time.predicates :as timepred])
   (:gen-class))
 
 ;; ==============
@@ -64,7 +66,7 @@
 
 (def header-block
   [:table {:width 100 :widths [92 8] :border-width 0}
-   [[:cell [:phrase {:style :italic :size 8 :family :helvetica :color heading-color-grey} (str "Generated: " (LocalDateTime/now))]]
+   [[:cell [:phrase {:style :italic :size 8 :family :helvetica :color heading-color-grey} (str "Generated: " (localtime/local-now))]]
     [:cell [:image {:xscale 0.5 :yscale 0.5} "resources/header_logo_blue.png"]]]])
 
 (def heading-one-style
@@ -160,18 +162,53 @@
   [markdownclj]
   (walk/walk construct-pdf-from-clj identity markdownclj))
 
+;; ===========
+;; File Naming
+;; ===========
+
+(def month-formatter (timefmt/formatter "yyyyMM"))
+
+(defn find-day-of-week
+  [base-date operator day-of-week-pred]
+  (loop [start-date base-date]
+    (if (day-of-week-pred start-date)
+      start-date
+      (recur (operator start-date (time/days 1))))))
+
+(defn weekly-file-name-string
+  [run-date]
+  (let [date-last-week (time/minus run-date (time/weeks 1))
+        last-monday (find-day-of-week date-last-week time/minus timepred/monday?)
+        last-sunday (find-day-of-week date-last-week time/plus timepred/sunday?)]
+    (str (localtime/format-local-time last-monday :basic-date)
+         "_"
+         (localtime/format-local-time last-sunday :basic-date))))
+
+(defn monthly-file-name-string
+  [run-date]
+  (let [date-last-month (time/minus run-date (time/months 1))]
+    (timefmt/unparse month-formatter date-last-month)))
+
+(defn decide-output-file-name
+  [output-path report-type run-date]
+  (let [param-map
+        (cond
+          (= report-type "WEEKLY") {:report-type "weeklyreport" :date-string (weekly-file-name-string run-date)}
+          (= report-type "MONTHLY") {:report-type "monthlyreport" :date-string (monthly-file-name-string run-date)})]
+    (str output-path "/arachnid_red_" (:report-type param-map) "_" (:date-string param-map) ".pdf")))
+
 ;; =====================
 ;; Command Line and Main
 ;; =====================
 
 (defn process-file
-  [input-path output-path report-type]
+  [input-file output-path report-type]
   (->
-    (extract-last-data-block-from-markdown input-path report-type)
+    (extract-last-data-block-from-markdown input-file report-type)
     (markdownclj->pdfclj)
     (add-metadata-to-doc-and-remove-nulls)
     (interpose-spacers)
-    (write-pdf output-path)))
+    (write-pdf (decide-output-file-name output-path report-type (localtime/local-now)))))
 
 (defn exit [status msg]
   (println msg)
