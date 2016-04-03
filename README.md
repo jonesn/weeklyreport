@@ -1,36 +1,18 @@
 # weeklyreport
 
-FIXME: description
-
-## Installation
-
-Download from http://example.com/FIXME.
+Weekly/Monthly report utility for contracting job. Generates PDF of master markdown.
 
 ## Usage
 
-FIXME: explanation
-
-    $ java -jar weeklyreport-0.1.0-standalone.jar [args]
+    $ java -jar weeklyreport-0.1.0-standalone.jar -t WEEKLY workburndown.md ~/Documents/weeklyreports
 
 ## Options
 
-FIXME: listing of options this app accepts.
+Generate a weekly/monthly report based on an input markdown file.
 
-## Examples
+Example Usage: weeklyReport -t WEEKLY inputMarkdown outputDirectory
 
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
-
-## License
-
-Copyright © 2016 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+Options:
+  -h, --help
+  -t, --type WEEKLY or MONTHLY
+ 
