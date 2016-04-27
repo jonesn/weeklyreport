@@ -67,7 +67,10 @@
 (def header-block
   [:table {:width 100 :widths [92 8] :border-width 0}
    [[:cell [:phrase {:style :italic :size 8 :family :helvetica :color heading-color-grey} (str "Generated: " (localtime/local-now))]]
-    [:cell [:image {:xscale 0.5 :yscale 0.5} "resources/header_logo_blue.png"]]]])
+    [:cell [:image {:xscale 0.5 :yscale 0.5} (javax.imageio.ImageIO/read
+                                               (-> "header_logo_blue.png"
+                                                   clojure.java.io/resource
+                                                   clojure.java.io/input-stream))]]]])
 
 (def heading-one-style
   {:style
