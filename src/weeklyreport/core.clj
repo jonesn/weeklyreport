@@ -238,9 +238,9 @@
         summary    (:summary cli-params)
         arguments  (:arguments cli-params)]
     (cond
-      (:help options)         (exit 0 (usage summary))
+      (:help options)            (exit 0 (usage summary))
       (not= (count arguments) 2) (exit 1 (usage summary))
-      :default                (process-file
-                                (first arguments)
-                                (second arguments)
-                                (:type options)))))
+      :default                   (process-file
+                                   (first arguments)
+                                   (second arguments)
+                                   (:type options)))))
