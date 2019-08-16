@@ -1,14 +1,14 @@
 (ns weeklyreport.core
-  (require [clojure.tools.cli :refer [parse-opts]]
-           [clojure.string :as string]
-           [endophile.core :as mdown]
-           [com.rpl.specter :as spec]
-           [clojure.walk :as walk]
-           [clj-pdf.core :as pdf]
-           [clj-time.local :as localtime]
-           [clj-time.core :as time]
-           [clj-time.format :as timefmt]
-           [clj-time.predicates :as timepred])
+  (:require [clojure.tools.cli :refer [parse-opts]]
+            [clojure.string :as string]
+            [endophile.core :as mdown]
+            [com.rpl.specter :as spec]
+            [clojure.walk :as walk]
+            [clj-pdf.core :as pdf]
+            [clj-time.local :as localtime]
+            [clj-time.core :as time]
+            [clj-time.format :as timefmt]
+            [clj-time.predicates :as timepred])
   (:gen-class))
 
 ;; ==============
